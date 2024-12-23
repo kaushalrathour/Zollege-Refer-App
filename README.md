@@ -15,12 +15,6 @@ This project is a **Refer and Earn** platform developed as part of the backend d
 
 ---
 
-## Project Structure
-
-- `client/`: React application for the frontend.
-- `server/`: Node.js backend server handling requests and providing API functionality.
-
----
 
 ## Project Structure
 
