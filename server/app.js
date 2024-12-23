@@ -11,14 +11,11 @@ const LocalStrategy = require("passport-local");
 const session = require("express-session");
 const User = require("./models/User");
 const morgan = require("morgan");
-const wrapAsync = require("./helpers/wrapAsync");
-const { removeSpaces } = require("./helpers/removeSpaces");
-const jwt = require("jsonwebtoken");
-const {
-  validateNewUser,
-  doesreferralExist,
-  doesUserExist,
-} = require("./middlewares");
+const userRoute = require("./routes/user");
+const otherRoute = require("./routes/other");
+const Wallet = require("./models/Wallet");
+const Earning = require("./models/Earning");
+const { verifyToken } = require("./helpers/verifyToken");
 
 app.use(cors("*"));
 app.use(morgan("tiny"));
@@ -44,67 +41,19 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.post(
-  "/login",
-  doesUserExist,
-  passport.authenticate("local", { failureMessage: true }),
-  wrapAsync(async (req, res) => {
-    const { name, username, email, referrals, referralCode } = req.user;
-    const token = jwt.sign({ _id: req.user._id }, process.env.SECRET);
-    res.json({
-      status: "success",
-      message: "Login Successful",
-      name,
-      username,
-      email,
-      referrals,
-      referralCode,
-      token,
-    });
-  })
-);
-
-app.post(
-  "/register",
-  validateNewUser,
-  doesreferralExist,
-  wrapAsync(async (req, res) => {
-    let { name, username, email, password, referredBy } = req.body;
-    username = removeSpaces(username.toLowerCase());
-    let user = new User({ name, username, email, referredBy });
-    user = await User.register(user, password);
-
-    if (req.referrer) {
-      const updated = await User.findByIdAndUpdate(
-        req.referrer._id,
-        { $push: { referrals: user._id } },
-        { new: true }
-      );
-      console.log(updated);
-    }
-
-    const token = jwt.sign({ _id: user._id }, process.env.SECRET);
-    res.status(StatusCodes.OK).json({
-      status: "success",
-      message: "Registration Successful",
-      name,
-      username,
-      email,
-      token,
-      referrer: req.referrer || null,
-    });
-  })
-);
+app.use("/", userRoute);
+app.use("/", otherRoute);
 
 app.use((err, req, res, next) => {
-  const { message, status = 500 } = err;
-
+  const { message = "An unexpected error occurred", status = 500 } = err;
+  // console.log("error message", err);
   if (["invalid signature", "jwt malformed"].includes(message)) {
     return res.status(400).json({ status: "failed", message: "Invalid Token" });
   }
 
   if (message === "Unauthorized") {
-    return res.json({
+    console.log("Unauthorized access attempt");
+    return res.status(401).json({
       status: "failed",
       message: "Please Enter Valid Password",
     });
@@ -124,11 +73,13 @@ app.use((err, req, res, next) => {
     });
   }
 
-  res.status(status).json({ status: "failed", message });
+  return res.status(status).json({ status: "failed", message });
 });
 
 app.all("*", (req, res) => {
-  res.status(404).json({ status: "failed", message: "Page Not Found" });
+  res
+    .status(StatusCodes.NOT_FOUND)
+    .json({ status: "failed", message: "Page Not Found" });
 });
 
 const server = app.listen(PORT, () => {
@@ -144,8 +95,23 @@ const io = require("socket.io")(server, {
 
 io.on("connection", async (socket) => {
   console.log("Connection Established");
+  try {
+    socket.on("fetchData", async (token) => {
+      const user = await verifyToken(token);
+      let referrals = [];
+      if (user) {
+        if (user.referrals.length > 0) {
+          referrals = await User.find({ _id: { $in: user.referrals } });
+        }
+        const earning = await Earning.find({ user: user._id });
+        const wallet = await Wallet.findById(user._id);
+        socket.emit("dataFetched", { earning, wallet, referrals });
+      }
+    });
+  } catch (error) {
+    console.log("Error");
+  }
 });
-
 async function connectWithDB() {
   try {
     await mongoose.connect(process.env.MONGO_URL);
