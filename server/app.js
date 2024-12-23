@@ -17,7 +17,16 @@ const Wallet = require("./models/Wallet");
 const Earning = require("./models/Earning");
 const { verifyToken } = require("./helpers/verifyToken");
 
-app.use(cors("*"));
+app.use(
+  cors({
+    origin: [
+      "https://zollege-refer-app-eta.vercel.app/",
+      "https://zollege-refer-app-eta.vercel.app",
+      "https://zollege-refer-app-eta.vercel.app/*",
+    ],
+    methods: ["GET", "POST"],
+  })
+);
 app.use(morgan("tiny"));
 
 const sessionOptions = {
@@ -88,7 +97,11 @@ const server = app.listen(PORT, () => {
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "*",
+    origin: [
+      "https://zollege-refer-app-eta.vercel.app/",
+      "https://zollege-refer-app-eta.vercel.app",
+      "https://zollege-refer-app-eta.vercel.app/*",
+    ],
   },
   pingTimeout: 60000,
 });
