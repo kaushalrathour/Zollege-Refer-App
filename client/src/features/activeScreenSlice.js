@@ -1,9 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const activeScreenSLice = createSlice({
+const activeScreenSlice = createSlice({
   name: "screenName",
   initialState: {
-    screenName: "Home",
+    screenName: "",
   },
   reducers: {
     setScreenName: (state, action) => {
@@ -12,6 +12,6 @@ const activeScreenSLice = createSlice({
   },
 });
 
-export const { setScreenName } = activeScreenSLice.actions;
+export const { setScreenName } = activeScreenSlice.actions;
 
-export default activeScreenSLice.actions;
+export default activeScreenSlice.reducer;
