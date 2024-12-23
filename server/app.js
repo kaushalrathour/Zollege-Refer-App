@@ -20,9 +20,9 @@ const { verifyToken } = require("./helpers/verifyToken");
 app.use(
   cors({
     origin: [
-      "https://zollege-refer-app-eta.vercel.app/",
-      "https://zollege-refer-app-eta.vercel.app",
-      "https://zollege-refer-app-eta.vercel.app/*",
+      "https://zollege-refer-app.vercel.app/",
+      "https://zollege-refer-app.vercel.app",
+      "https://zollege-refer-app.vercel.app/*",
     ],
     methods: ["GET", "POST"],
   })
@@ -98,9 +98,9 @@ const server = app.listen(PORT, () => {
 const io = require("socket.io")(server, {
   cors: {
     origin: [
-      "https://zollege-refer-app-eta.vercel.app/",
-      "https://zollege-refer-app-eta.vercel.app",
-      "https://zollege-refer-app-eta.vercel.app/*",
+      "https://zollege-refer-app.vercel.app/",
+      "https://zollege-refer-app.vercel.app",
+      "https://zollege-refer-app.vercel.app/*",
     ],
   },
   pingTimeout: 60000,

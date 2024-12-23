@@ -101,7 +101,7 @@ export default function ReferAndEarn() {
             alignItems: "center",
           }}
         >
-          {`https://zollege-refer-app-eta.vercel.app/${userInfo.referralCode}`}
+          {`https://zollege-refer-app.vercel.app/${userInfo.referralCode}`}
         </Typography>
       </Box>
       <Divider sx={{ my: 3 }} />
