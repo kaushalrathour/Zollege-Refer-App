@@ -5,6 +5,7 @@ import Auth from "./screens/Auth";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import NotFound from "./screens/NotFound";
+import NotFound from "./screens/DisplayAssetLinks"
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "./features/userSlice";
 import Wallet from "./screens/Wallet";
@@ -94,6 +95,7 @@ export default function Container() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
+            <Route path="/.well-known/assetlinks.json" element={<DisplayAssetLinks/>} />
             {!isLoggedIn && (
               <>
                 <Route path="/auth" element={<Auth />} />
